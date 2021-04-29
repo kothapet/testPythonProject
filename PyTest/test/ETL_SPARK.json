@@ -1,0 +1,67 @@
+{
+  "inputs":[
+    {
+      "ViewName":"vw_file1",
+      "SourceLayer":"formatted",
+      "SourceFormat":"parquet",
+      "PartitionKeys": ["TransactionId"],
+      "NumPartitions":"20",
+      "Cache":true,
+      "formatted_path":"input-bucket",
+      "formatted_key":"input/file1.parquet"
+    },
+    {
+      "ViewName":"vw_file2",
+      "SourceLayer":"formatted",
+      "SourceFormat":"parquet",
+      "PartitionKeys": ["key1"],
+      "NumPartitions":"20",
+      "Cache":true,
+      "formatted_path":"input-bucket",
+      "formatted_key":"input/file2.parquet"
+    }
+  ],
+  "transformations":{
+    "1":{
+      "ViewName":"vw_out1",
+      "PartitionKeys": ["key1"],
+      "NumPartitions":"20",
+      "Cache":false,
+      "SparkQuery":"Select * from vw_file1 F1 inner join vw_file2 F2 on F1.key1 = F2.key1"
+    },
+    "2":{
+      "ViewName":"vw_temp2",
+      "PartitionKeys": ["key1"],
+      "NumPartitions":"20",
+      "Cache":false,
+      "SparkQuery": "Select  T1.key1, T1.col1, Count(1) as NumberOfRows, Sum(T1.Amount) as TotalAmount from vw_out1 T1 group by T1.key1, T1.key2"
+    },
+    "3":{
+      "ViewName":"vw_out2",
+      "PartitionKeys": ["key1"],
+      "NumPartitions":"20",
+      "Cache":false,
+      "SparkTransform": "dfDict[viewName] = dfDict[\"vw_temp2\"].withColumn(\"RowId\", F.monotonically_increasing_id())"
+    }
+  },
+  "outputs":[
+    {
+      "ViewName":"vw_out1",
+      "TargetLayer":"formatted",
+      "TargetFormat":"parquet",
+      "SparkSaveMode": "overwrite",
+      "Location": "s3",
+      "formatted_key":"output/out1.parquet",
+      "formatted_path":"output-bucket"
+    },
+    {
+      "ViewName":"vw_out2",
+      "TargetLayer":"formatted",
+      "TargetFormat":"csv",
+      "SparkSaveMode": "overwrite",
+      "Location": "s3",
+      "formatted_key":"output/out2.csv",
+      "formatted_path":"output-bucket"
+    }
+  ]
+}
