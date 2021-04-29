@@ -154,11 +154,11 @@ def processOutputs(i_spark, i_dataframes, i_outputMetaData):
 LOGGER = logging.getLogger("com.aws.gwf")
 LOGGER.setLevel(logging.INFO)
 
-LOGGER.info('Starting ak-spark-etl-transform : ', datetime.now().strftime('%m/%d/%Y %H:%M:%S'))
+LOGGER.info('Starting ak-spark-xform : ', datetime.now().strftime('%m/%d/%Y %H:%M:%S'))
 #---------------------------------------------------------------------------------------------------
 process_status="Successful"
 
-meta_bucket =  'dev-gwf-cc-raw-class0-us-east-1'
+meta_bucket =  'meta-bucket'
 meta_key = 'metadata/ETL_SPARK.json'
 try:
     #meta_data = getJsonS3Data(meta_bucket, meta_key)
@@ -176,7 +176,7 @@ try:
     spark._jsc.hadoopConfiguration().set("fs.s3a.awsSecretAccessKey", "[SECRET KEY]")
     # SSE-KMS doesn't work in 2.8.5
     spark._jsc.hadoopConfiguration().set("fs.s3a.server-side-encryption-algorithm", "SSE-KMS")
-    spark._jsc.hadoopConfiguration().set("fs.s3a.server-side-encryption.key", "arn:aws:kms:us-east-1:716303183772:key/f76ea1ee-a179-4992-96df-c6764cfca460")
+    spark._jsc.hadoopConfiguration().set("fs.s3a.server-side-encryption.key", "arn:aws:kms:us-east-1::key/xxxxx-xxx-xxx")
     '''
     spark._jsc.hadoopConfiguration().set("f3.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
     spark._jsc.hadoopConfiguration().set("f3.s3a.region", "us-east-1")
@@ -211,7 +211,7 @@ except Exception as e:
     process_status="Failure"
     raise e
 finally:
-    LOGGER.info(process_status, ' ak-spark-etl-transform : ', datetime.now().strftime('%m/%d/%Y %H:%M:%S'))
+    LOGGER.info(process_status, ' ak-spark-xform : ', datetime.now().strftime('%m/%d/%Y %H:%M:%S'))
 #---------------------------------------------------------------------------------------------------
 
 
