@@ -1,0 +1,90 @@
+{
+	"inputs": [
+		{
+			"ViewName": "vw_test_data",
+			"SourceLayer": "formatted",
+			"SourceFormat": "csv",
+			"PartitionKeys": ["test_id"],
+			"NumPartitions": "20",
+			"Cache": true,
+			"formatted_path": "my-bucket",
+			"formatted_key": "metadata/input/test_data.csv"
+		},
+		{
+			"ViewName": "vw_test_additional_data",
+			"SourceLayer": "formatted",
+			"SourceFormat": "csv",
+			"PartitionKeys": ["test_id"],
+			"NumPartitions": "20",
+			"Cache": true,
+			"formatted_path": "my-bucket",
+			"formatted_key": "metadata/input/test_additional_data.csv"
+		},
+		{
+			"ViewName": "vw_test_source_data",
+			"SourceLayer": "formatted",
+			"SourceFormat": "csv",
+			"PartitionKeys": ["test_id"],
+			"NumPartitions": "20",
+			"Cache": true,
+			"formatted_path": "my-bucket",
+			"formatted_key": "metadata/input/test_source_data.csv"
+		},
+		{
+			"ViewName": "vw_test_source_vesting_data",
+			"SourceLayer": "formatted",
+			"SourceFormat": "csv",
+			"PartitionKeys": ["test_id"],
+			"NumPartitions": "20",
+			"Cache": true,
+			"formatted_path": "my-bucket",
+			"formatted_key": "metadata/input/vw_test_source_vesting_data.csv"
+		}
+	],
+	"outputs": [
+		{
+			"ViewName": "vw_json",
+			"TargetLayer": "formatted",
+			"TargetFormat": "json",
+			"SparkSaveMode": "overwrite",
+            "PartitionBy": ["test_id"],
+			"Location": "s3",
+			"formatted_key": "metadata/output/TRANSACTIONSUMMARY.csv",
+			"formatted_path": "my-bucket"
+		}
+	],
+	"output_json": {
+        "ViewName": "vw_json",
+        "sub_levels": [
+            {
+        		"test_data": {
+        			"QueryText": "select * from vw_test_data",
+        			"sub_levels": [
+        				{
+        					"test_additional_data": {
+        						"QueryText": "select * from vw_test_additional_data",
+        						"Keys": ["test_id"]
+        					}
+        				},
+        				{
+        					"test_source_data": {
+        						"QueryText": "select * from vw_test_source_data",
+        						"Keys": ["test_id"],
+        						"Array": true,
+        						"sub_levels": [
+        							{
+        								"test_additional_data": {
+        									"QueryText": "select * from vw_test_source_vesting_data",
+        									"Keys": ["test_id"],
+        									"Array": true
+        								}
+        							}
+        						]
+        					}
+        				}
+        			]
+        		}
+            }
+    	]
+	}
+}
